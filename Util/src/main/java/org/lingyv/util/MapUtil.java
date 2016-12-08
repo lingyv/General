@@ -1,4 +1,4 @@
-package org.lingyv.Util;
+package org.lingyv.util;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;

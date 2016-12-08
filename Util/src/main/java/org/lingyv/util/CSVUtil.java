@@ -1,4 +1,4 @@
-package org.lingyv.Util;
+package org.lingyv.util;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

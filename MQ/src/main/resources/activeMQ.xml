@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/jms
+       http://www.springframework.org/schema/jms/spring-jms.xsd
+       http://activemq.apache.org/schema/core
+       http://activemq.apache.org/schema/core/activemq-core-5.2.0.xsd">
+
+    <!-- 加载资源文件-->
+    <context:property-placeholder location="classpath:jms.properties"/>
+
+    <!-- 产生Connection的ConnectionFactory，由JMS服务厂商提供-->
+    <amq:connectionFactory id="amqConnectionFactory"
+                           brokerURL="tcp://localhost:61616" userName="admin" password="admin"/>
+
+    <!-- Spring用于管理ConnectionFactory的ConnectionFactory -->
+    <bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <!-- 目标ConnectionFactory对应JMS Connection的ConnectionFactory -->
+        <constructor-arg ref="amqConnectionFactory"/>
+        <!-- Session缓存数量 -->
+        <property name="sessionCacheSize" value="100"/>
+    </bean>
+
+    <!-- JmsTemplate Definition -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- connectionFactory对应Spring提供的ConnectionFactory对象 -->
+        <constructor-arg ref="cachingConnectionFactory"/>
+        <property name="defaultDestinationName" value="Test"/>
+        <!--是否是发布/订阅模式-->
+        <property name="pubSubDomain" value="false"/>
+    </bean>
+
+    <!--消息消费类-->
+    <bean id="simpleMessageListener" class="org.lingyv.mq.ReceiveMessage.SimpleMessageListener"/>
+
+    <!-- 监听器容器-->
+    <!--传递类型:点对点queue，发布/订阅topic-->
+    <jms:listener-container
+            destination-type="queue"
+            container-type="default"
+            connection-factory="cachingConnectionFactory"
+            acknowledge="auto">
+        <!--监听器  destination 目标队列名称-->
+        <jms:listener id="QueueListener" destination="Test" ref="simpleMessageListener"/>
+    </jms:listener-container>
+
+</beans>

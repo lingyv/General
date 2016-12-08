@@ -1,4 +1,4 @@
-package org.lingyv.Util;
+package org.lingyv.util;
 
 import java.util.Random;
 
